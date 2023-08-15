@@ -325,5 +325,7 @@ head(fish)
 glm(fish ~ acres + depth_mu + depth_max + elev_ft + management + lat,
     data = fish, family = "quasipoisson") %>% summary
 
-# Checking if git integration worked
+# Git integration
+usethis::create_github_token()
+gitcreds::gitcreds_set()
 #
