@@ -8,6 +8,7 @@ library(tidyr)
 library(palmerpenguins)
 library(lme4)
 library(lmerTest)
+library(stringr)
 library(dplyr) #load last to avoid conflicts between packages
 
 # Set general plot parameters somewhere where they won't get lost
@@ -328,4 +329,69 @@ glm(fish ~ acres + depth_mu + depth_max + elev_ft + management + lat,
 # Git integration
 usethis::create_github_token()
 gitcreds::gitcreds_set()
-#
+
+
+# PCA
+head(penguins)
+
+gentoo_pca <- penguins %>% filter(species == "Gentoo") %>%
+  select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_kg)
+
+head(gentoo_pca)
+penguins %>% filter(species == "Gentoo") %>%
+  ggplot(aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point()+
+  geom_smooth(method = "lm", se= F) +
+  labs(x="var 1", y = "var 2")
+
+
+str(pca1)
+summary(pca1)
+pca1$rotation
+pca1$x
+plot(pca1)
+pca2 <- penguins %>% select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_kg) %>%
+  prcomp(center = TRUE, scale. = TRUE)
+str(pca2)
+
+devtools::install_github("vqv/ggbiplot")
+library(ggbiplot)
+ggbiplot(pca2,
+         obs.scale = 1,
+         var.scale = 1,
+         groups = penguins$species,
+         ellipse = T)
+cor(penguins$flipper_length_mm, penguins$body_mass_kg)
+
+
+# Chocolate chip cookies --------------------------------------------------
+# wrangle the data into wide format, simplify ingredients
+cookies <- read.csv("datasets/choc_chip_cookie_ingredients.csv")
+head(cookies)
+cookies <- filter(cookies, Ingredient %in% c("all purpose flour",
+                                            "baking powder",
+                                            "baking soda",
+                                            "butter",
+                                            "egg",
+                                            "salt",
+                                            "sugar",
+                                            "vanilla",
+                                            "light brown sugar",
+                                            "dark brown sugar",
+                                            "bittersweet chocolate chip",
+                                            "semisweet chocolate chip",
+                                            "milk chocolate chip")) %>%
+  mutate(Ingredient = str_replace_all(Ingredient, " ", "_")) %>%
+  select(Ingredient, Recipe_Index, Quantity) %>%
+  pivot_wider(id_cols = Recipe_Index,
+                        names_from = Ingredient,
+                        values_from = Quantity,
+                        names_sep = "_",
+                        values_fn = mean,
+                        values_fill = 0)
+head(cookies)
+write.csv(cookies, "datasets/cookies.csv")
+cookies %>% dplyr::group_by(Recipe_Index, Ingredient) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  filter(n > 1L)
+cookies %>% filter(Recipe_Index == "Misc_109")
