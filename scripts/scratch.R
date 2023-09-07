@@ -2,13 +2,15 @@
 # Scratch script for ECOL 596
 # I can add more context notes to the header here
 
-library(ggplot2)
-library(ggthemr)
-library(tidyr)
-library(palmerpenguins)
-library(lme4)
+library(ggplot2) # plotting
+library(ggthemr) # plot themes
+library(tidyr) # data wrangling, automatically includes ggplot and other packages
+
+library(lme4) #tests
 library(lmerTest)
-library(stringr)
+
+library(dslabs)
+library(palmerpenguins) # for penguins dataset
 library(dplyr) #load last to avoid conflicts between packages
 
 # Set general plot parameters somewhere where they won't get lost
@@ -24,6 +26,8 @@ penguins <- penguins
 # Data processing section 1 -----------------------------------------------
 finch <- mutate(finch, species = as.factor(species))
 
+finch %>% select(date, type_of_site, species, mass,
+                 sex, band, pox_IUR) %>% head
 
 
 plot(Beak_length ~ beak_depth, data = finch)
@@ -54,7 +58,6 @@ finch %>% filter(Species == "large") %>% pull (Wing)
 
 aggregate(Wing ~ Species + type_of_site, data = finch, mean)
 
-head(finch)
 finch |> ggplot(aes(x = Species, y = Mass))+
   geom_boxplot()
 str(finch$Plumage)
@@ -395,3 +398,16 @@ cookies %>% dplyr::group_by(Recipe_Index, Ingredient) %>%
   summarise(n = n(), .groups = "drop") %>%
   filter(n > 1L)
 cookies %>% filter(Recipe_Index == "Misc_109")
+
+
+
+
+# dslabs ------------------------------------------------------------------
+
+murders <- murders
+str(murders$region)
+
+testnorm <- rpois(n = 100, lambda = 7)
+qqnorm(testnorm)
+qqline(testnorm)
+
