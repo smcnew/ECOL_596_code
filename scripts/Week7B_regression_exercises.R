@@ -15,7 +15,7 @@ library(emmeans)
 library(dplyr) #load last to avoid conflicts between packages
 
 # Set graphing parameters (optional), see ggthemr website for options
-ggthemr(palette = "grape", layout = "clean", text_size = 22)
+# ggthemr(palette = "grape", layout = "clean", text_size = 22)
 
 # Load data:
 penguins <- penguins
@@ -87,6 +87,19 @@ filter(penguins, is.na(flipper_length_mm))
 # size of Adelies differ significantly among islands? Create plots and lm
 # to answer this question. Interpret the coefficients in your lm output
 #
+#
+#
+# Problem 4: Create a new dataset called penguins2 that does not have Adelie penguins.
+# Say you want to test whether the mass of gentoo penguins is significantly
+# different from that of chinstrap penguins. Use a t.test and a lm to answer
+# this question. Compare the output. Where is the output of the tests similar?
+# Where is it different?
+#
+#
+# Hot tip: Download sjPlot and use tab_model() for easier formatting of model outputs
+# install.packages("sjPlot")
+# library(sjPlot)
+# lm(body_mass_g ~ sex, penguins) %>% tab_model()
 #
 # Additional problems:
 # Suave: https://whitlockschluter3e.zoology.ubc.ca/RLabs/R_tutorial_Correlation_Regression.html

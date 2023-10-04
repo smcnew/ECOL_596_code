@@ -411,3 +411,9 @@ testnorm <- rpois(n = 100, lambda = 7)
 qqnorm(testnorm)
 qqline(testnorm)
 
+head(penguins)
+
+dbinom(4, 5, prob = 0.5)
+pbinom(10, 30, prob = 0.5)
+test <- rbinom(10000, 30, p = 0.5)
+test[test == 20] %>% length
