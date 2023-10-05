@@ -40,7 +40,15 @@ filter(penguins, is.na(flipper_length_mm))
 # do you think it's flipper will be? Calculate the value using the model coeffs.
 # what is the equation of the model line?
 #
-# 1f: R will also calculated predicted values of Y for us, using the predict()
+head(penguins)
+
+lm1 <- lm(body_mass_g ~ flipper_length_mm, data = penguins)
+lm1 <- lm(flipper_length_mm ~ body_mass_g, data = penguins)
+lm1$coefficients
+
+(0.01527592  * 4000 ) + 136
+summary(lm1)
+1f: R will also calculated predicted values of Y for us, using the predict()
 # function. Read the documentation of this function and try to figure out how it works.
 # Use predict() to predict the ys for a set of four penguins with mass (2120,
 # 5780, 4700, and 8001)
