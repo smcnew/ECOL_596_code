@@ -26,11 +26,17 @@ ggthemr(palette = "flat dark", layout = "clean", text_size = 18)
 #
 # 1a. Create a plot of the proportion of successful breeders in the predation
 # group and in the control group.
-#
+
+swallows %>% group_by(treatment) %>%
+  summarize(proportion = mean(success)) %>% ggplot(aes(x= treatment, y = proportion)) + geom_col()
+head(swallows)
+swallows %>% mutate(percent_fledge = nestlings_lived/brood_size) %>%
+  group_by(treatment) %>% summarize(mean_fledge = mean(percent_fledge, na.rm=T)) %>%
+  ggplot(aes(x = treatment, y = mean_fledge)) +geom_col()
 # 1b. Create a plot of the overall percentage of nestlings that fledged in
 # the predator and control groups.
 #
-# 1c. Use a generalized linear model (aka. logistic regression) to test whether
+# 1c. Use a generalized linear model (aka logistic regression) to test whether
 # breeding success differed between predator and control groups using "success"
 # as a response variable.
 #
@@ -65,11 +71,11 @@ ggthemr(palette = "flat dark", layout = "clean", text_size = 18)
 # Compare and contrast the results of your lm and lmm. How do the coefficients and
 # p values differ?
 
-# Question 3: test for effects of treatment on nestling fledging success
+# Question 3: test for effects of treatment on individual nestling fledging success
 # 3a: Make a plot showing the differences in percent fledging success for nestlings
 # in the control vs. predator treatment
 #
-# 3b: Use a normal lm to model the effects of treatment on fledging success.
+# 3b: Use a normal lm to model the effects of treatment on fledging success (yes this isn't the best approach).
 # You'll first want to create a new vector that codes nestling fate as a numeric
 # value. How do you interpret these coefficients? Do they make sense?
 #
