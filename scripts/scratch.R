@@ -188,7 +188,12 @@ mod2 <- lm(bill_length_mm ~ flipper_length_mm, data = penguins)
 # predicting values
 predict(mod2, newdata = data.frame(flipper_length_mm  = 300))
 summary(mod2)
+plot(mod2)
 
+mod2 <- lm(bill_length_mm ~ flipper_length_mm , data = penguins)
+
+penguins %>% filter(species != "Adelie") %>% t.test(body_mass_g ~ species, data = ., var.equal = T)
+penguins %>% filter(species != "Adelie") %>% lm(body_mass_g ~ species, data = .) %>% summary
 
 # Tukey pair-wise contrasts
 library(emmeans)
@@ -251,14 +256,14 @@ glm(as.factor(success) ~ treatment, data = swallows, family = "binomial") %>% su
 
 LaplacesDemon::invlogit(0.5306)
 LaplacesDemon::invlogit(0.5306 - 1.6881)
-
+exp(0.5306)/(1+exp(0.5306))
 percentage_data <- swallows %>% group_by(treatment) %>% summarize(percent_fledge = mean(success))
 ggplot(percentage_data, aes(x = treatment, y = percent_fledge)) + geom_col()
 
 swallows <- swallows %>% mutate(percent_fledge = nestlings_lived / brood_size)
 swallows %>% select(success, nestlings_died, nestlings_lived, percent_fledge) %>% head
 
-
+head(swallows)
 glm(cbind(nestlings_lived, nestlings_died) ~ treatment, data = swallows, family = "binomial") %>% summary
 
 
@@ -417,3 +422,23 @@ dbinom(4, 5, prob = 0.5)
 pbinom(10, 30, prob = 0.5)
 test <- rbinom(10000, 30, p = 0.5)
 test[test == 20] %>% length
+
+# p vals ------------------------------------------------------------------
+testdf <- data.frame(one = c("1","1,3,4","3,3", "1,2,3,4,5"), two = c("1,3", "2,3,5", "1","1"))
+testdf %>% separate_wider_delim(cols = c(one, two),
+                                 delim = ",",
+                                 names = c("1","2","3","4","5"),
+                                 names_sep = "_",
+                                 too_few = "align_start")
+
+
+# retidy titanic ----------------------------------------------------------
+
+titanic <- read.csv("datasets/titanic.csv")
+head(titanic)
+summary(titanic$Age)
+table(titanic$Sex)
+titanic <- titanic %>% mutate(Sex = tolower(Sex))
+
+titanic <- filter(titanic, Age < 100)
+titanic %>% write.csv("datasets/titanic_tidy.csv")
