@@ -442,3 +442,17 @@ titanic <- titanic %>% mutate(Sex = tolower(Sex))
 
 titanic <- filter(titanic, Age < 100)
 titanic %>% write.csv("datasets/titanic_tidy.csv")
+
+
+# skyler ------------------------------------------------------------------
+
+data_w <- read.csv("~/Downloads/data_w.csv")
+head(data_w)
+twentyeight <- data_w %>% select(participant, contains("twentyeight")) %>%
+                pivot_longer(cols=contains("twentyeight"), values_to = "county") %>%
+                drop_na(county)
+
+head(twentyeight)
+filter(twentyeight, county == 1)
+table(twentyeight$county)
+  #
