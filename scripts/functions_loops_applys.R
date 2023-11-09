@@ -6,7 +6,7 @@
 affirmation <- function(x) {
   paste(x, ", you are awesome", sep = "")
 }
-affirmation("sabrina")
+affirmation(class_list)
 
 std.error <- function (x) {
   print(sd(x)/sqrt(length(x - 1)))
@@ -39,3 +39,9 @@ tapply(X = penguins$bill_length_mm, INDEX = penguins$species, FUN = mean, na.rm 
 
 aggregate(bill_length_mm ~ species, data = penguins, FUN = mean, na.rm = T)
 penguins %>% group_by(species) %>% summarize(sppbill = mean(bill_length_mm))
+
+
+x <- rnorm(n = 50, mean = 10, sd = 2)
+y <- rnorm(n = 50, mean = 11, sd = 2)
+t.test(x = x, y = y)$p.value
+

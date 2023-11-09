@@ -12,7 +12,7 @@ library(lmerTest)
 library(dslabs)
 library(palmerpenguins) # for penguins dataset
 library(dplyr) #load last to avoid conflicts between packages
-
+install.packages("usethis")
 # Set general plot parameters somewhere where they won't get lost
 ggthemr(palette = "flat", layout = "clean", text_size = 22)
 
