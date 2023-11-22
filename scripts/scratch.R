@@ -13,8 +13,11 @@ library(dslabs)
 library(palmerpenguins) # for penguins dataset
 library(dplyr) #load last to avoid conflicts between packages
 install.packages("usethis")
+
+devtools::install_github("vqv/ggbiplot")
+library(ggbiplot)
 # Set general plot parameters somewhere where they won't get lost
-ggthemr(palette = "flat", layout = "clean", text_size = 22)
+ggthemr(palette = "flat", layout = "clean", text_size = 18)
 
 # Load Data ---------------------------------------------------------------
 finch <- read.csv("datasets/finch.csv")
@@ -362,8 +365,7 @@ pca2 <- penguins %>% select(bill_length_mm, bill_depth_mm, flipper_length_mm, bo
   prcomp(center = TRUE, scale. = TRUE)
 str(pca2)
 
-devtools::install_github("vqv/ggbiplot")
-library(ggbiplot)
+
 ggbiplot(pca2,
          obs.scale = 1,
          var.scale = 1,
@@ -455,4 +457,18 @@ twentyeight <- data_w %>% select(participant, contains("twentyeight")) %>%
 head(twentyeight)
 filter(twentyeight, county == 1)
 table(twentyeight$county)
-  #
+
+
+# PCA exploration
+marg <- read.csv("datasets/marg.csv")
+marg_pca <- prcomp(marg[,-c(1)], center = T, scale = T)
+
+ggbiplot(marg_pca,
+         obs.scale = 1,
+         var.scale = 1,
+         labels = marg$recipe,
+         varname.size = 5,
+         labels.size = 5) +
+  scale_x_continuous(limits = c(-2,3)) +
+  scale_y_continuous(limits = c(-2.5, 1.5))
+marg_pca$rotation
