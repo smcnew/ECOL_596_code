@@ -2,6 +2,9 @@
 # Scratch script for ECOL 596
 # I can add more context notes to the header here
 
+#install.packages("usethis")
+#devtools::install_github("vqv/ggbiplot")
+
 library(ggplot2) # plotting
 library(ggthemr) # plot themes
 library(tidyr) # data wrangling, automatically includes ggplot and other packages
@@ -9,13 +12,12 @@ library(tidyr) # data wrangling, automatically includes ggplot and other package
 library(lme4) #tests
 library(lmerTest)
 
-library(dslabs)
+library(dslabs) # for Irizarry sets
+library(ggbiplot) # for pca
 library(palmerpenguins) # for penguins dataset
 library(dplyr) #load last to avoid conflicts between packages
-install.packages("usethis")
 
-devtools::install_github("vqv/ggbiplot")
-library(ggbiplot)
+
 # Set general plot parameters somewhere where they won't get lost
 ggthemr(palette = "flat", layout = "clean", text_size = 18)
 
@@ -462,7 +464,7 @@ table(twentyeight$county)
 # PCA exploration
 marg <- read.csv("datasets/marg.csv")
 marg_pca <- prcomp(marg[,-c(1)], center = T, scale = T)
-
+head(marg)
 ggbiplot(marg_pca,
          obs.scale = 1,
          var.scale = 1,
@@ -472,3 +474,43 @@ ggbiplot(marg_pca,
   scale_x_continuous(limits = c(-2,3)) +
   scale_y_continuous(limits = c(-2.5, 1.5))
 marg_pca$rotation
+
+
+# p adjust ----------------------------------------------------------------
+
+
+ps <- c(0.004, 0.001, 0.05, 0.007, 0.00001)
+p.adjust(ps, method = "bonferroni")
+
+null_ps <- data.frame(p = NA, group = rep("no_diff",8000))
+for (i in 1:nrow(null_ps)){
+  control = rnorm(n = 10, mean = 5, sd = 1)
+  treatment = rnorm(n = 10, mean = 5, sd = 1)
+  test = t.test(control, treatment)
+  null_ps$p[i] <- test$p.value
+}
+raw_genes <- data.frame(group = c(rep("control",1000), rep ("treatment", 1000)),
+                        reads = c(rnorm(n = 1000, mean = 5, sd = 1),
+                                  rnorm(n = 1000, mean = 7, sd = 1)))
+raw_genes %>% ggplot(aes (x = reads, fill = group)) + geom_density(alpha = 0.4)
+control = rnorm(n = 10000, mean = 5, sd = 1)
+
+sig_ps <- data.frame(p = NA, group = rep("diff",1000))
+for (i in 1:nrow(sig_ps)){
+  control = rnorm(n = 10, mean = 5, sd = 1)
+  treatment = rnorm(n = 10, mean = 7, sd = 1)
+  test = t.test(control, treatment)
+  sig_ps$p[i] <- test$p.value
+}
+null_ps %>% ggplot(aes(x = p)) + geom_histogram()
+allps <- rbind(sig_ps, null_ps)
+allps %>% ggplot(aes(x = p, fill = group)) + geom_histogram()
+
+
+allps <- allps %>%
+  arrange(p) %>%
+  mutate(rank = 1:nrow(allps))
+
+
+allps %>% filter(rank < 1000) %>% ggplot(aes(x = rank, y = p, color = group))+geom_point(size = 3)
+str(allps$rank)
