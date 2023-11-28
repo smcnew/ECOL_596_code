@@ -1,0 +1,243 @@
+---
+title: "Functions, for loops etc."
+author: "Sabrina McNew"
+date: "2023-11-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = F}
+library(palmerpenguins)
+library(dplyr)
+```
+
+### Functions
+You can create a function in R instead of copying code many times over. 
+Common applications:  
+ 
+* Plots   
+* Wrangling / Processing   
+* Convenience functions (e.g., standard error)
+
+Anatomy of a function:  
+(Modify things in italics with your own information)  
+*name.of.function* <- function( *arguments = * ) {  
+*things function does*  
+}  
+
+### Some toy functions 
+
+```{r}
+
+affirmation <- function (name){
+  paste(name, "is awesome", sep = " ")
+}
+affirmation(name = "margaret")
+
+class_list <- c("margaret", "isabella", "maddie")
+affirmation(class_list)
+
+```
+
+Another example: R does not have a native standard error function. 
+We could download a package (plotrix) and use its std.error() function
+or we could make our own.  
+```{r}
+# Note: your arguments can be called whatever you want, it's just a placeholder 
+
+standard.error <- function(blue){
+  sd(blue)/sqrt(length(blue))
+}
+standard.error(1:10)
+
+#let's double check this gives us the same answer as plotrix's function
+plotrix::std.error(1:10)
+
+# We can also make functions with multiple arguments 
+fun = function(x,y){
+  x*y
+}
+fun(y = 1:5, x = c(100,200,300,400,500))
+```
+#### Pros and Cons of DIY Functions: 
+
+Pros: 
+
+* Customizable
+* Lowers chances that you'll mess up copying and pasting code
+* Shortens/condenses code 
+
+Cons
+
+* Possible to create a function that has unexpected or undesired behavior,
+and to not notice it because you are just using it blindly 
+* Very good idea to "sanity check" your DIY functions against either a built-in function or some set of representative tests. 
+
+### For Loops 
+
+A for loop is a programming convention that allows us to do something many 
+times. In R, we don't have to use for loops as often as some other languages,
+because R is vectorized, and often will just apply the function to each
+item in the vector (see examples above). However, there are plenty of opportunities to use loops. 
+
+An example: Say we want to simulate t-tests comparing two populations
+that are either a priori different or the same. We can simulate these data 
+by asking R to draw samples from a normal distribution with rnorm()
+
+```{r}
+# x and y are populations with the same mean (5)
+# Will the t.test correctly tell us that there's no difference in means? 
+x <- rnorm(n = 100, mean = 5, sd = 1)
+y <- rnorm(n = 100, mean = 5, sd = 1)
+t.test(x, y)$p.value
+
+# usually it does, but every once in a while by chance we'll get a 
+# significant result (aka a type I error)
+
+x <- rnorm(n = 100, mean = 5, sd = 1)
+y <- rnorm(n = 100, mean = 5, sd = 1)
+t.test(x, y)$p.value
+
+x <- rnorm(n = 100, mean = 5, sd = 1)
+y <- rnorm(n = 100, mean = 5, sd = 1)
+t.test(x, y)$p.value
+
+```
+
+We could copy and paste this code and/or run it a bunch of times 
+but that gets kind of tedious. Let's put it into a loop instead.  
+
+The structure of a loop is similar to a function:  
+*for (i in vector) {do something involving i }*   
+means that for every value in the vector, we will do whatever 
+is in the bracket, substituting "i" for whatever value of the vector we're on. It's common to iterate over numeric vectors like for (i in 1:100). In
+that case, the first i is 1, the second i is 2, and so on. For each iteration of the loop, it will replace i with 1, 2, 3, etc. until it gets to the last value in the vector. 
+
+
+```{r}
+# Start by creating a placeholder vector to save our looped results
+# Remember we can index vectors using []. vector[1] returns the 
+# first item in the vector, vector[20] returns the 20th item. 
+
+myps <- rep(NA, 1000)
+
+# Make a loop.   
+# Save the p value in the ith spot of myps vector
+for (i in 1:1000) {
+  x <- rnorm(n = 100, mean = 5, sd = 1)
+  y <- rnorm(n = 100, mean = 5, sd = 1)
+myps[i] <- t.test(x, y)$p.value 
+}
+# What does our myps vector look like now? 
+head(myps)
+# What's the distribution of our p values? Under a no-difference 
+# scenario, the ps should be uniformly distributed 
+hist(myps)
+
+# How many ps were false positives? I.e. < 0.05?, should be approx 5% of 1000
+myps[myps < 0.05] %>% length() 
+```
+We can also combine for loops and functions 
+```{r}
+# Create a function that simulates a t test between 
+# samples drawn from populations with known means 
+simulated.t.test <- function(meanx, meany) {
+x <- rnorm(n = 100, mean = meanx, sd = 1)
+y <- rnorm(n = 100, mean = meany, sd = 1)
+t.test(x, y)$p.value
+}
+
+simulated.t.test(meanx = 5, meany = 5) # should be > 0.05
+simulated.t.test(meanx = 5, meany = 8) # should be < 0.05
+
+# Throw the function into a loop. Let's see how often our t.test
+# can detect a significant difference between populations that do differ 
+# slightly 
+
+sigps <- NULL # vector to save results 
+for (i in 1:1000){
+  sigps[i] <- simulated.t.test(meanx = 5, meany = 5.3)
+}
+
+hist(sigps)
+# How many ps were significant? (This is akin to a power simulation), only
+# ~50% of the time did we detect a true difference, so our power was 50% 
+sigps[sigps < 0.05] %>% length 
+```
+
+### Applys
+There's a big family of functions in R called apply- they're not scary! 
+They're actually pretty similar to for loops. 
+
+* The basic apply() will perform functions on rows or columns of your choosing
+* sapply() and lapply() work a lot like loops 
+* mapply() will apply function to multiple lists/vectors 
+
+```{r}
+# apply example: what if we want to calculate standard 
+# deviation on all the columns in a dataframe? 
+
+# Create a clean toy dataframe with numeric columns from penguins
+penguins_morph <- penguins %>% 
+  select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g) %>%   na.omit() %>% 
+  as.data.frame()
+
+# We could calculate sd for each column individually...
+sd(penguins_morph$bill_length_mm)
+
+# Remember that dataframe[row,column] is a way to index dataframes in base r. So we can also grab the first column like this: 
+sd(penguins_morph[,1])
+
+# We could do it in a loop
+# This says for 1:4 (the number of columns we have)
+# Calculate the sd of the ith column and then print it 
+for (i in 1:4){
+  sd(penguins_morph[,i]) %>% print()
+}
+
+# we can do it in apply(), which will apply a function to either rows 
+# or columns in a dataframe.
+# apply's arguments are: 
+# X = the data frame 
+# MARGIN = 1 (to apply the thing to each row) or 2 (to apply the thing to each column) FUN = function of interest)
+
+apply(X = penguins_morph, MARGIN = 2, FUN = sd)
+```
+
+More flexible than apply() are sapply() and lapply() which apply FUN to each value of X (a vector, list etc.). Notice you can put any function into the FUN argument, and if you create your own you don't put the {} in there. 
+```{R}
+
+sapply(X = 1:4, FUN = function (x) sd(penguins_morph[,x])) # returns a vector 
+lapply(X = 1:4, FUN = function (x) sd(penguins_morph[,x])) # returns a list
+```
+
+
+### Finally, a little exercise: 
+A data processing scenario: You have done some lab work which produces 
+values of interest for each well on a plate. However, you need to connect 
+the values that came out of the microplate reader to your "metadata" i.e. sample and well info. 
+
+```{r}
+# Some path corrections are required while working in markdown 
+# If these don't work for you check your path using getwd() and adjust 
+# accordingly. 
+
+plate1 <- read.csv("../datasets/results/plate1.csv")
+plate2 <- read.csv("../datasets/results/plate2.csv")
+plate3 <- read.csv("../datasets/results/plate3.csv")
+metadata <- read.csv("../datasets/results/metadata.csv")
+head(metadata)
+head(plate1)
+
+```
+
+### Your task: 
+
+* Figure out how to join the sample and treatment columns onto plate 1
+* Note that the wells (A1...) repeat on each plate... how do you come up 
+with a unique identifier? 
+* Figure out how to turn this procedure into a function so it could be used to process any plate that you run 
+* Loop this function to process all 3 plates. 
