@@ -21,6 +21,7 @@ library(dplyr) #load last to avoid conflicts between packages
 # Set general plot parameters somewhere where they won't get lost
 ggthemr(palette = "flat", layout = "clean", text_size = 18)
 
+
 # Load Data ---------------------------------------------------------------
 finch <- read.csv("datasets/finch.csv")
 fish <- read.delim("datasets/maine_fish.txt", header = TRUE, sep = "\t")
@@ -514,3 +515,10 @@ allps <- allps %>%
 
 allps %>% filter(rank < 1000) %>% ggplot(aes(x = rank, y = p, color = group))+geom_point(size = 3)
 str(allps$rank)
+
+install.packages("Matrix")
+install.package("TMB", type = "source")
+install.package("glmmTMB", type = "source")
+install.packages("ggeffects")
+library("glmmTMB")
+

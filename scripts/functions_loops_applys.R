@@ -120,3 +120,7 @@ head(metadata)
 head(plate1)
 
 #goal: add sample and treatment from metadata onto plate 1
+
+
+
+
