@@ -6,4 +6,5 @@
 # Forking and cloning: use the function usethis::create_from_github() to
 # copy a repo that you then can track and also suggest changes to.
 
-#a branch is a copy of your clone that you edit. use branches when collaborating (treat main as read only)
+# branch is a copy of the clone that I edit on my own and then can push to and pull from
+# Margaret makes changes that clearly conflict too :/
