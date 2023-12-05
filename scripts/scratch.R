@@ -522,3 +522,15 @@ install.package("glmmTMB", type = "source")
 install.packages("ggeffects")
 library("glmmTMB")
 
+
+students <- c("amal","annabelle","paige", "lauren", "brenden",
+              "ally", "nick", "cody", "jayden", "vanessa")
+split(students, f = sample(rep(1:3, c(3, 3, 4))))
+
+amal: lauren, cody 2 , annabelle, jaden 2, nick,
+paige: lauren, ally, vanessa 2, cody, nick, brend, jayd
+lauren: paige, ally 2, v2, cody, amal, brenden
+annabelle: nick 2, brenden, jayden, amal, ally, v
+ally: vanessa 2, lauren 2 , paige, brenden, annabelle,
+cody: amal, jayden, paige, van, annabelle, ally
+
