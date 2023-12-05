@@ -86,3 +86,23 @@ legend("topright", bty = "n", lwd = 2, col = 1:length(TPDs_iris_d1$TPDs),
        legend = names(TPDs_iris_d1$TPDs))
 ```
 
+I copy and paste this to graph other things a lot, so here's a function with all that code in it!
+```{r}
+tpd_plot <- function(TPDs_output) {
+  par(mfrow=c(1,1))
+  plot(TPDs_output$data$evaluation_grid, TPDs_output$TPDs[[1]], type="n",
+       ylim = c(0,max(sapply(TPDs_output$TPDs, max))))
+
+  for (i in 1:length(TPDs_output$TPDs)){
+    lines(TPDs_output$data$evaluation_grid, TPDs_output$TPDs[[i]], lwd=2, col=i)
+  }
+  legend("topright", bty = "n", lwd = 2, col = 1:length(TPDs_output$TPDs),
+         legend = names(TPDs_output$TPDs))
+
+}
+
+# see if it works!
+tpd_plot(TPDs_iris_d1)
+
+```
+
