@@ -1,0 +1,34 @@
+---
+title: "Sabrina_dplyr"
+author: "Sabrina McNew"
+date: "2023-12-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#dplyr, a useful package
+
+Let me tell you about a package I like. It's called dplyr. 
+Here's how you install and load it.
+```{r, message = FALSE}
+install.packages("dplyr")
+install.packages("palmerpenguins")
+library(dplyr)
+library(palmerpenguins)
+```
+
+Here are some useful functions in dplyr
+
+```{r}
+penguins <- penguins
+
+#filter() allows us to select certain rows based on logical criteria
+# %>% is the pipe in dplyr
+penguins %>% filter(species == "Adelie") %>% head
+
+```
+
+
