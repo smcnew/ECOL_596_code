@@ -1,0 +1,82 @@
+---
+title: "RGBIF_guide"
+author: "Poppy Northing"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#Load libraries
+
+#install.library("rgbif")
+library(rgbif)
+library(tidyverse)
+```
+
+## This is a guide for using the basic functions in the RGBIF package
+
+The RGBIF package allows users to download occurrence data from the Global Biodiversity Information Facility (GBIF). This guide will show you how to load data from GBIF into R, some of the basic functions in the RGBIF package, and how easily visualize your occurrence data.
+
+First, lets pick a focal taxon to practice with. I'm going to use my favorite local plant, *Calochortus kennedyi*. The first step in using the RGBIF functions is to identify the taxonomic usage key for that species in GBIF. We can do that with RGBIF using the "name_backbone" function.
+```{r cars, results = FALSE, echo=TRUE}
+name_backbone("Calochortus kennedyi") #generates a tibble with the usage key and full taxonomic backbone for C. kennedyi
+
+calochortus_key <- name_backbone("Calochortus")$usageKey #saves the usage key only to a new variable that we can use later on
+```
+
+Now that we have the usage key for *C. kennedyi*, let's load in the occurrence data that we want. For my computer's sake, I'm only going to search through occurrences rather than downloading them (I've included the function for this too, though). The occ_search and occ_download functions takes **several** different arguments that filter through all GBIF occurrences and generates a list containing the occurrence data, metadata, taxonomic hierarchy, and media from occurrences. 
+```{r search, echo=TRUE}
+
+#Search and save C. kennedyi occurrences from 1600-2022. Note that I used both the scientificName and speciesKey arguments to say which occurrences to get. 
+cakenn <- occ_search(scientificName = "Calochortus kennedyi", speciesKey = 2750755, year = "1600,2022")$data #gets the "data" dataframe from the list generated from the occ_search function
+
+#If I wanted to actually download these data:
+#cakenn <- occ_download(scientificName = "Calochortus kennedyi", speciesKey = 2750755, year = "1600,2022")$data
+```
+
+Note: we can use the occ_count function to generate the number of a occurrences that meet specified search criteria. In this case, I just want to know how many *C. kennedyi* occurrences there are in GBIF. Here, I use the usage key generated earlier to do this, but you can use the scientificName argument if you want.
+
+```{r count, echo=TRUE}
+#Count number of occurrences that match the usage key for C. kennedyi
+occ_count(taxonKey = calochortus_key)
+```
+
+Here's an example of how you can use occurrence count data. I wanted to generate a table with how many occurrences there are of *C. kennedyi* from every year in the past decade. I decided to use a for loop to do this.
+
+```{r occurrence, echo=TRUE}
+  #Make a vector containing all the years I want occurrence counts from
+  years <- c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")
+  
+  #Initialize a data frame to insert the occurrence data by year in the loop
+  df <- data.frame(Col1 = integer(),
+                   Col2 = integer())
+  #Generates occurrence counts for each year and puts them in the dataframe
+  for (x in years){
+    occurences <- occ_count(scientificName = "Calochortus kennedyi", year=x)
+    df <- rbind(df, c(as.numeric(x), as.numeric(occurences)))
+  }
+  cakenn_decade <- df
+```
+
+If you plot these data with ggplot, they look like this:
+
+```{r visualize_counts, include = TRUE, echo=FALSE}
+ggplot(data = cakenn_decade, aes(x = as.factor(X2013), y = X13)) + 
+    geom_point() +
+    xlab("Year") +
+    ylab("Occurences")
+```
+
+Here's another example of how you can use the occurrences data. I want to how many of the *C. kennedyi* occurrences were from each state in a given year. I can do that 
+
+```{r states, echo=TRUE, message=FALSE}
+#Make a dataframe with the month, state, and number of occurrences. 
+cakenn_sum <- cakenn %>% group_by(month, stateProvince) %>% summarize(count = n()) 
+```
+
+Here's what a plot of this looks like. yay!
+
+```{r visualize_states, include = TRUE, warning=FALSE, echo=FALSE}
+  ggplot(data = cakenn, aes(x = month, fill = stateProvince)) + geom_bar() + ylab("Number of Records") + xlab("Month")
+```
+
