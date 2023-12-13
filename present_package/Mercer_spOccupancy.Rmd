@@ -1,0 +1,118 @@
+---
+title: "Mercer_spOccupancy"
+output: html_document
+date: "2023-12-11"
+---
+
+# Install and load all packages needed for spOccupancy
+```{r, results = "hide"}
+#install.packages("spOccupancy")
+#install.packages("stars")
+library(spOccupancy)
+library(coda)
+library(stars)
+```
+
+# Load the data and take a look at it.
+
+This particular dataset is point count data, where a technician goes to a certain location, listens for birds, and records whether each species is present or absent over a certain period of time.
+
+The data below includes three dimensions of binary (presence/absence) data for our y: 1. Species, 2. Location, 3. Bout number.
+
+The "occ.covs" line describes the occupancy covariates (variables that affect occupancy, in this case altitude), and the "det.covs" line describes detection covariates (variables that affect detection, in this case day and time of day).
+
+The "coords" line includes site coordinates for spatial analysis (today we won't be doing a spatial analysis, but it's good to know the information is there).
+```{r}
+data(hbef2015)
+str(hbef2015)
+```
+
+In this case, we're doing a simple nonspatial occupancy model on just one species (the ovenbird), so we'll subset the data to include only that species.
+``` {r, results = "hide"}
+sp.names <- dimnames(hbef2015$y)[[1]]
+ovenHBEF <- hbef2015
+ovenHBEF$y <- ovenHBEF$y[sp.names == "OVEN", , ]
+```
+
+Now let's look at the data for our chosen species.
+```{r}
+str(ovenHBEF)
+```
+
+# Define components of model
+Now we'll define each of the parts of our PGOcc (simple single species occupancy model).
+
+We need to put each piece of information into an object. Once we do that, we'll stick those objects into the function in the correct order.
+
+Here is the model with its main arguments:
+
+
+#### PGOcc(occ.formula, det.formula, data, inits, priors, n.samples, n.omp.threads = ___, verbose = ___, n.report = ___, n.burn = ___, n.thin = ___, n.chains = ___)
+
+Let's define our objects. First we define how we want the model to calculate our occupancy and detection rates:
+``` {r}
+oven.occ.formula <- ~ scale(Elevation) + I(scale(Elevation)^2)
+oven.det.formula <- ~ scale(day) + scale(tod) + I(scale(day)^2)
+```
+
+
+Next we'll tell the model what initial values we want it to work off of.
+``` {r}
+oven.inits <- list(alpha = 0, 
+                   beta = 0, 
+                   z = apply(ovenHBEF$y, 1, max, na.rm = TRUE))
+```
+
+
+We'll establish the priors, which define what we expect from the model. This helps the model along.
+``` {r}
+oven.priors <- list(alpha.normal = list(mean = 0, var = 2.72), 
+                    beta.normal = list(mean = 0, var = 2.72))
+```
+
+
+Now we define some of the model parameters. "n.samples" is the number of data points we'd like the model to produce; "n.burn" is how many samples we want the model to produce during its "warmup" phase or learning period; "n.thin" is how frequently we'd like the model to thin its values to reduce autocorrelation; "n.chains" is how many times you want the model to run all the way through.
+``` {r}
+n.samples <- 5000
+n.burn <- 3000
+n.thin <- 2
+n.chains <- 3
+```
+
+
+There are other arguments that we won't use objects for. 
+
+"n.omp.threads" asks how many chains we'd like the model to run at once.
+
+"verbose" is asking if we'd like the model to "report" back to us its progress, and "n.report" asks how often we'd like it to do so. We'll set verbose to "TRUE" and n.report to "1000", so when we run the simulation, R will update us every 1000 lines.
+
+# Run model
+
+Plug the defined objects into model and save to an object.
+```{r, results = "hide"}
+out <- PGOcc(occ.formula = oven.occ.formula, 
+             det.formula = oven.det.formula, 
+             data = ovenHBEF, 
+             inits = oven.inits, 
+             n.samples = n.samples, 
+             priors = oven.priors, 
+             n.omp.threads = 1, 
+             verbose = TRUE, 
+             n.report = 1000, 
+             n.burn = n.burn, 
+             n.thin = n.thin, 
+             n.chains = n.chains)
+```
+
+Look at the contents of the resulting object.
+```{r}
+summary(out)
+```
+
+The first four lines show us the function we wrote; the next 6 lines of code show us what specifications we chose for our model.
+
+Under "occurrence", we see information about how strongly different factors affect the occurrence of the ovenbird in the study area. The mean of "intercept" tells us (in the logit scale) the odds of an ovenbird occurring at a given point the study area. The mean of "scale(Elevation)" tells us (again in the logit scale) the effect of elevation on this number; for every one unit increase in elevation, there is a 1.67 (logit) decrease in the odds of an ovenbird occurring in the study area.
+
+The "detection" section is similar. The mean of the intercept is the odds in the logit scale of an ovenbird being detected at any given point, given that it is present. "scale(day)" tells us the effect of day on the odds of detection, and "scale(tod)" tells us the effect of time of day on the odds of detection.
+
+For all coefficients: SD = standard deviation; 2.5% = lower 95% CI; 50% = median value; 97.5% = upper 95% CI; Rhat = how good the model did at fitting the predicted values to the data (Rhats closer to 1 are better); and ESS = effective sample size.
