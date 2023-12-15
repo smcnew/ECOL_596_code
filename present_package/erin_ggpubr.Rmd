@@ -1,0 +1,77 @@
+---
+title: "ephelps_ggpubr.Rmd"
+author: "Erin Phelps"
+date: "2023-12-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ggpubr
+ 
+ggplot2 package is great for data visualization. However, it can have confusing syntax for beginners in R. Many researchers/scientists use R just for data visualization to produce highly-customizable charts on demand. So, ggpubr makes it easier to produce publication-ready plots using ggplot2.
+
+ggpubr makes it easier to: 
+ - add p-values and significance levels
+ - Arrange and annotate plots on the same page
+ - Change graphical parameters -> colors, labels, etc.
+
+
+## loading in ggpubr package
+Since ggpubr is a wrapper, ggplot also needs to be loaded in.
+
+```{r, message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+library(palmerpenguins)
+```
+
+## Read in data to make plot
+
+
+```{r, message=FALSE}
+penguins <- penguins
+```
+
+## Create a plot using ggplot
+ 
+
+```{r, message=FALSE}
+ggplot(penguins, aes(x = species, y = flipper_length_mm)) +
+  geom_boxplot() +
+  labs(title = "Penguin Species vs. Flipper Length", x = "Species",
+       y = "Flipper Length (mm)")
+
+```
+
+## Create a plot using ggpubr
+
+Now I am going to create the same plot using ggpubr.
+You will notice you do not need to use aethetics or geoms while using ggpubr. Additionally, the plot looks more "publication ready". 
+
+```{r, message=FALSE}
+ggboxplot(penguins, x = "species", y = "flipper_length_mm", 
+          title = "Penguin Species vs. Flipper Length", xlab = "Species",
+       ylab = "Flipper Length (mm)")
+```
+
+## ggpubr themes
+
+# The most popular use of ggpubr is its themes. These themes make your plot "publication ready".
+
+theme_pubr(): Create a publication ready theme
+
+theme_pubclean(): a clean theme without axis lines, to direct more attention to the data.
+
+labs_pubr(): Format only plot labels to a publication ready style
+
+theme_classic2(): Create a classic theme with axis lines.
+
+clean_theme(): Remove axis lines, ticks, texts and titles.
+
+clean_table_theme(): Clean the the theme of a table, such as those created by ggsummarytable()
+
+
