@@ -1,0 +1,12 @@
+---
+title: "Hunter Clark Esquisse and ggThemeAssist"
+author: "Hunter C"
+date: "2023-12-08"
+output: html_document
+---
+
+Both packages can be pulled from the CRAN repository.
+
+Esquisse greatly assists in generating plots. After opening a popout window through the "Addins" button in the top menu of RStudio, you can load your data set, then create plots by dragging and dropping variables to respective categories in the window. Esquisse also allows color and text customization.
+
+ggThemeAssist can also help in beautifying plots. Accessed in the same way as Esquisse, you can select a plot you've already made and use this package to easily edit text, colors, and other visuals on your plot.
