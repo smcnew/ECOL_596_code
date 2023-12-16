@@ -1,0 +1,152 @@
+---
+title: "ECOL-596-Present a package"
+author: "Owino Raymond"
+date: "2023-12-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,options(digits = 2))
+```
+
+## Package "Unmarked"
+
+This is a package used in the estimation of population attributed  such as density and abundance of unmarked animals. Common methods used include, capture mark recapture and distance sampling both of which depends on the presence and abscence of individuals (also known as occupancy) 
+
+#### Example with occupancy
+
+```{r}
+# load package
+library(unmarked)
+library(ggplot2)
+```
+
+##### Data and data preparation
+```{r}
+ydat <- read.csv("ydat.csv",header = T)
+covariates <- read.csv("covariates.csv", header = T)
+```
+
+```{r}
+# View data 
+ydat # Data from 12 camera (each row is a camera trap) traps placed out for 14 days (header d1..d14) 
+covariates# site description using vegetation, EU = Eucalyptus, and VF = Vine forest.You could have other covariates of any data type such as tree density or percentage canopy cover, whichever you think would affect detection probability
+```
+
+```{r}
+# Convert data to unmarked format
+umf <- unmarkedFrameOccu(y = ydat, siteCovs = covariates) # combines camera trap data with site covariates 
+head(umf,n=5) # checks if the two data frames combined successfully
+```
+
+#### Fitting a null model
+```{r}
+m1 <- occu(~1 ~1, umf);m1 # This model fits constant detection (~1) and occupancy (~1) probability respectively. Output is on a logit scale and needs transformation to better interpret it.
+m1.psi <- backTransform(m1,type = "state");m1.psi # This is comparable to the number of trapping site that an animal was detected. Check the "ydat" table above and notice that out of the 12 cameras, 2 failed to operated throughout hence they are excluded in the analysis while 1 failed after operating for 9 days. 7/10 = 0.7 remaining sites recorded (marked as 1) at least an individual detection also known as naive occupancy
+m1.p <- backTransform(m1,type = "det");m1.p # While psi above does not consider the number of times a single site recorded an animal, "p" uses the capture history of the site to determine the probability of detecting an animal given that it is present in the site. In general, out of the 14 trapping days in each site how many times did the camera record an animals. 
+
+# We can also get confidence interval of our estimates
+m1.ci.psi <-confint(m1.psi);m1.ci.psi
+m1.ci.p <-confint(m1.p);m1.ci.p
+```
+#### Building on the model with varying occupancy 
+```{r}
+# Further we can fit model with constant detection but varied occupancy
+m2 <- occu(~1 ~site, umf);m2 # In the output, you want to check occupancy, just like this example, a large p-value shows that occupancy did not vary with site and vice verses. 
+
+# This chunk of code just calls out all the estimates and confidence interval for comparison in a table-like format
+preds <- data.frame(site = c("Euc","VF")) # predict dataframe
+fit.m2.psi <- predict(m2,type = "state",newdata = preds,appendData = TRUE)
+fit.m2.psi$type <-"psi"
+fit.m2.psi
+
+fit.m2.p <- predict(m2,type = "det",newdata = preds,appendData = TRUE)
+fit.m2.p$type <-"p"
+fit.m2.p
+
+fit.m2 <- rbind(fit.m2.psi,fit.m2.p);fit.m2 # combine and plot
+```
+
+```{r}
+# fit model with varied detection
+m3 <- occu(~site ~1, umf);m3
+
+preds <- data.frame(site = c("Euc","VF")) # predict datorframe
+fit.m3.psi <- predict(m3,type = "state",newdata = preds,appendData = TRUE)
+fit.m3.psi$type <-"psi"
+fit.m3.psi
+
+fit.m3.p <- predict(m3,type = "det",newdata = preds,appendData = TRUE)
+fit.m3.p$type <-"p"
+fit.m3.p
+
+fit.m3 <- rbind(fit.m3.psi,fit.m3.p);fit.m3 # combine and plot
+```
+#### Varying both detection and occupancy
+```{r}
+# fit model with varied detection and occupancy
+m4 <- occu(~site ~site, umf);m4
+
+preds <- data.frame(site = c("Euc","VF")) # predict datorframe
+fit.m4.psi <- predict(m4,type = "state",newdata = preds,appendData = TRUE)
+fit.m4.psi$type <-"psi"
+fit.m4.psi
+
+fit.m4.p <- predict(m4,type = "det",newdata = preds,appendData = TRUE)
+fit.m4.p$type <-"p"
+fit.m4.p
+
+fit.m4 <- rbind(fit.m4.psi,fit.m4.p);fit.m4 # combine and plot
+```
+#### Model Selection
+```{r}
+# Model selection
+AICs <- data.frame(model = c("m1","m2","m3","m4"),
+                   AIC = c(m1@AIC,m2@AIC,m3@AIC,m4@AIC))
+
+AICs
+
+outputs.m1 <-data.frame(Par = c("psi","p"),
+                        estimates =  c(m1.psi@estimate,m1.p@estimate),
+                        lwr = c(m1.ci.psi[1],m1.ci.p[1]),
+                        upr = c(m1.ci.psi[2],m1.ci.p[2])) # using the better model
+
+outputs.m1
+
+
+# psi and p as functions of vegetation height
+fms <- fitList(m1, m2, m3, m4)
+```
+#### Output visualization
+```{r}
+# psi in each habitat type
+newdata1 <- data.frame(site=c('Euc', 'VF'))
+Epsi1 <- predict(fms, type="state", newdata=newdata1)
+with(Epsi1, {
+  plot(1:2, Predicted, xaxt="n", xlim=c(0.5, 2.5), ylim=c(0.5, 1),
+       xlab="Site",ylab=expression(paste("Probability of occurrence (", psi, ")")),
+       cex.lab=1.2,
+       pch=16, cex=1.5)
+  axis(1, 1:2, c('Euc', 'VF'))
+  arrows(1:2, Predicted-SE, 1:2, Predicted+SE, angle=90, code=3, length=0.05)
+})
+
+                      
+# psi and p 
+
+p1 <- ggplot(outputs.m1, aes(x = Par, y = estimates)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymin = lwr, ymax = upr),
+                colour = "red",
+                width = .1) +
+  labs(x = "", y = "Model estimates", title = "Occupancy model")
+  
+
+
+p1+ theme_bw() + theme(
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(
+  )) + 
+  theme(text = element_text(size = 20))  
+
+```
