@@ -1,0 +1,51 @@
+---
+title: 'Morpho: an R package for automated surface semi-landmarking'
+author: "Alex Stewart"
+date: "12/18/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(max.print = 50)
+```
+
+## Creating an Atlas
+
+An atlas mesh essentially serves as a reference mesh, ideally with all of the traits you are interested in examining.
+The positions of manually placed surface landmarks on the atlas are projected onto other meshes to automate surface landmark placement!
+
+In Morpho, the function **createAtlas**(mesh, landmarks, patch) is used to create an atlas object for the region of interest.
+
+1. ***mesh***: a .ply file containing a mesh of the atlas
+2. ***landmarks***: a matrix containing **fixed** landmarks for the atlas and all other samples
+3. ***patch***: a matrix containing surface semi-landmarks on the atlas that will be projected onto each sample in the *landmarks* matrix
+
+The following is an example usage for createAtlas from the Morpho vignette:
+```{r Creating an atlas}
+library(Morpho)
+data(nose)
+atlas = createAtlas(shortnose.mesh, shortnose.lm[c(1:5,20:21),], shortnose.lm[-c(1:5,20:21),])
+atlas
+```
+
+## Placing patches on other meshes
+
+After an atlas has been created, the patch can be projected onto the other meshes in your sample. This is done using the **placePatch** function. The function takes three arguments and returns a matrix with the coordinates of the placed patch.
+
+1. ***atlas***: the atlas generated using createAtlas
+2. ***dat.array***: an array containing **fixed** landmarks for all samples (NOT including the atlas)
+3. ***path***: a file path to a directory containing sample meshes
+
+
+The following is an example usage for placePatch from the Morpho vignette:
+```{r Placing surface semi-landmarks}
+longnose.mesh <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm,threads=1)
+mesh2ply(longnose.mesh, filename="longnose")
+
+patch_data = longnose.lm[c(1:5,20:21), ]
+
+patched = placePatch(atlas, patch_data, prefix="longnose", path="./", inflate=5)
+patched
+```
+Note that placePatch places things automatically, and can make mistakes that are easily visible to the human eye (e.g., placing points within a hole on a mesh). All automated placements should be checked before moving on with data processing pipelines.
