@@ -89,4 +89,4 @@ scatter(dapcamac, scree.da=TRUE, bg="white", pch=14:22, cstar=0, clab=0, col=myc
 #see tutorial for other options. There is a lot available
 ```
 
-The package has a lot of other features. It also has functions for PCAs, sPCAs, isolation by distance tests (e.g. Mantel). See tutorial for details. 
+The package has a lot of other features. It also has functions for PCAs, sPCAs, isolation by distance tests (e.g. Mantel). See tutorial for details, it is fairly detailed.
