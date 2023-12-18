@@ -1,0 +1,92 @@
+---
+title: "DataScience-Present-Package"
+output: html_document
+date: "2023-12-16"
+---
+
+Overview
+adegenet is a package for a variey of population genetics analyses
+-it has a variety of dependencies and recommended packages that can work along with it. THese include:
+ape (various phylogenetic tools)
+pegas (various population genetic analyses tools)
+seqinr (for sequence retrieval and analyses)
+hierfstat (for calculation of F-statistics and other population information)
+tidyverse}
+```{r}
+install.packages("ape")
+install.packages("pegas")
+install.packages("seqinr")
+install.packages("hierfstat")
+library(ape)
+library(pegas)
+library(seqinr)
+library(hierfstat)
+library(tidyverse)
+
+```
+
+adegenet supports 4 types of genetic data files
+-genind, genpop, SNPbin, and genlight
+-SNPbin and genlight are for large, genomic datasets which are condensed so that analyses can be run on standard laptops
+
+upload data similarly to other data (e.g. read.genepop()), though if you want to convert a .csv you will need to use a special function
+
+```{r}
+amac -> read.genepop("Amac-Redo-Genepop.gen", ncode=3)
+#this was the name of one of my microsat files, replace with the title of your genetic data file and whatever object name you would like
+```
+
+
+Once your data has been uploaded, you can utilize a variety of statistics, and it has a fairly detailed tutorial. Here are a few examples:
+
+```{r}
+hw.test(amac, B=0) 
+#testing for Hardy-Weinberg Equilibrium at all loci
+
+wc(amac) 
+#gives overall FST and FIS as Weir and Cockerham's unbiased estimators
+
+Fst(as.loci(amac)) 
+#FST, FIS, and FIT per locus
+
+amac2ci -> genind2hierfstat(amac)
+boot.vc(amac2ci[1], amac2ci[-1])$ci 
+#confidence intervals for the overall statistics
+
+pairwise.WCfst(amac)
+genet.dist(amac) 
+# for pairwise FST or other genetic distance measures, confidence intervals with boot.ppfst()
+```
+
+-The defining feature of agegenet is the DAPC (discriminant analysis of principal components)
+-first, you need to determine the number of principal components and genetic clusters
+  -select the number of PCs that maximize variation while minimizing PCs, usually around where it starts to plateau
+  -for clusters, find the minimum BIC value, usually a sharp peak
+-then run the DAPC 
+
+```{r}
+find.clusters(amac)
+#will give 2 prompts
+  # choose the # of PCs to retain (>=1)
+  # choose the number of clusters (>=2)
+
+dapc(amac)
+#to run the dapc
+#will also give two prompts
+  # choose the # of PCs to retain (>=1)
+  # choose the number of discriminant functions to retain
+
+dapcamac -> dapc(amac)
+scatter(dapcamac)
+#creates the scatter plot. This is customizable, see tutorial for details, several examples below
+
+scatter(dapcamac, scree.da=TRUE, posi.da= "bottomleft")
+# moves the DA eigenvalues legend to the bottom left
+
+scatter(dapcamac, scree.da=TRUE, bg="white", pch=14:22, cstar=0, clab=0, col=mycol, leg=TRUE, txt.leg=paste("cluster", 1:9), posi.leg="topleft", posi.da= "bottomleft")
+# changes the shape of the data points, changes the colors of the points to a preset (mycol, this can be whetever suite of colors you want), adds a legend with clusters called cluster 1, cluster 2, etc.put in the top left.
+
+#see tutorial for other options. There is a lot available
+```
+
+The package has a lot of other features. It also has functions for PCAs, sPCAs, isolation by distance tests (e.g. Mantel). See tutorial for details. 
