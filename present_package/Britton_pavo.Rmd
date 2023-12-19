@@ -1,0 +1,47 @@
+---
+title: "Britton_pavo"
+author: "Sarah Britton"
+date: "2023-12-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The pavo package
+
+This package is used for image analysis! Pavo stands for "Perceptual Analysis, Visualization and Organization of Spectral Color Data." Note, there is now a pavo2 update as well. This package can read in either image data with getimg() or spectral data with getspec(). You can import images from your workspace or from online and you can import multiple imgaes at once. The package can import PNG, JPEG, and BMP files and returns a class "rimg."
+```{r}
+install.packages("pavo")
+library(pavo)
+```
+```{r}
+#read in an example built into the package
+papilio <- getimg(system.file("testdata/images/butterflies/papilio.png", package = "pavo"))
+
+```
+## Basic Functions
+classify() segments the image into distinct color classes. You need to set the number of classes you want. The output is a matrix with the color classification for each pixel and an RBG definition of each color class. Using the matrix you can do further analysis of how the color classes are distributed, how many pixels of each color class there are, etc. 
+
+
+```{r}
+classify <- classify(papilio, kcol=3, plotnew = TRUE)
+```
+## Advanced Functions
+vismodel() allows you to correct for viewer’s visual system
+E.g. insect or avian visual system is tetrachromatic
+
+adjacent() performs adjacency analysis and edge analysis. This allows you to do all kinds of fancy things like quantify patterns and specify color distances.
+
+
+## Literature Examples
+Maia et al., 2019: "pavo 2: New tools for the spectral and spatial analysis of colour in r" 
+ https://doi.org/10.1111/2041-210X.13174
+ 
+ Marcondes et al., 2021: "Rethinking Gloger’s Rule: Climate, Light Environments, and Color in a Large Family of Tropical Birds (Furnariidae)" 
+ https://doi.org/10.1086/713386
+ 
+ 
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
