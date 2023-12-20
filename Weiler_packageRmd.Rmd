@@ -1,0 +1,56 @@
+---
+title: "Weiler_edgeR"
+author: "Isabella Weiler"
+date: "2023-12-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load packages
+
+```{r packages, echo=FALSE}
+install.packages("BiocManager")
+BiocManager::install("edgeR")
+library(edgeR)
+library(org.Dm.eg.db)
+```
+
+## Next, let's look through some vignettes:
+
+```{r pressure, echo=FALSE}
+browseVignettes("edgeR")
+```
+
+## That will give us some important information about how to work with our data. So let's
+load some data!
+
+```{r data, echo=FALSE}
+CountFile <- paste("http://bowtie-bio.sourceforge.net/recount",
+                    "countTables",
+                    "modencodefly_count_table.txt", sep="/")
+Counts <- read.delim(CountFile, row.names=1)
+```
+
+# Next, we can run some analyses: 
+
+```{r analysis, echo=FALSE}
+ Hours <- seq(from=2, to=24, by=2)
+Time <- paste0(Hours,"hrs")
+y <- DGEList(counts=PooledCounts[,1:12], group=Time)
+```
+
+#Here are a few more. This will help us annotate genes of interest:
+
+```{r analysis 2, echo=FALSE}
+
+> multiVals <- function(x) paste(x,collapse=";")
+> Symbol <- mapIds(org.Dm.eg.db, keys=rownames(y), keytype="FLYBASE",
++                  column="SYMBOL", multiVals=multiVals)
+ y$genes <- data.frame(Symbol=Symbol, stringsAsFactors=FALSE)
+ head(y$genes)
+```
+
+#Using the vignettes, we can also filter out low reads, and plot some important data. 
