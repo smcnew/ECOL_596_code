@@ -1,0 +1,24 @@
+---
+title: "McWaters_Esquisser"
+author: "Shannon McWaters"
+date: "2023-12-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Esquisser
+
+This is a ggplot addin that allows you to make ggplots with a drag and drop interface. It's super helpful for those getting started with ggplot or those who don't use it often enough to have memorized all the language for things such as changing the size of your data points. 
+What's super cool about this is that once you make your plot, it produces a code for that plot that you can write directly into your r script. This is nice because the addin doesn't do everything that is possible wiht ggplot and you most likely will need to tweak the code more. But personally, I always do better with building off a prexisting code. 
+
+```{r}
+install.packages("esquisser")
+library(esquisser)
+```
+```{r}
+#You can either launch the addin by running the line of code below - or you can go to the tools -> addins and you should see it as an option 
+esquisser() #this will launch the add in where you can choose your dataframe from the environment, external files, google sheets, or you can copy and paste the data
+esquisser(mtcars) #alternatively you can just call the addin with the data frame you wish to use
