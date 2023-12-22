@@ -1,0 +1,37 @@
+---
+title: "McWaters_DataExplorer"
+author: "Shannon McWaters"
+date: "2023-12-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Explorer package
+
+This package's purpose is to help automate some of the data handling and visualization so that users can more efficiently study the data and look for insights and patterns. This package just uses your raw data file.
+```{r}
+install.packages("DataExplorer")
+library(DataExplorer)
+```
+```{r}
+#download a library for an example
+mtcars <- library(mtcars)
+
+```
+## Basic Functions
+There are many functions that you can individually run that will look at aspects of your data (e.g. missing values, distributions, correlations) and you can easily find these on the vignette.
+However, a quick way to see a lot of these options is:
+create_report() which will make a document of your choosing that compiles most of these functions into a report. I'll put an example code below for how to make a html document report
+
+```{r}
+create_report(
+  mtcars,
+  output_file = "report_example.html",
+  output_dir = getwd(),
+  config = configure_report(),
+  report_title = "mtcars Data Report"
+)
+```
