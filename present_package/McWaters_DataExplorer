@@ -1,7 +1,7 @@
 ---
 title: "McWaters_DataExplorer"
 author: "Shannon McWaters"
-date: "2023-12-21"
+date: "2023-12-22"
 output: html_document
 ---
 
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This package's purpose is to help automate some of the data handling and visualization so that users can more efficiently study the data and look for insights and patterns. This package just uses your raw data file.
 ```{r}
-install.packages("DataExplorer")
+install.packages("DataExplorer",repos = "http://cran.us.r-project.org")
 library(DataExplorer)
 ```
 ```{r}
