@@ -15,7 +15,7 @@ This is a ggplot addin that allows you to make ggplots with a drag and drop inte
 What's super cool about this is that once you make your plot, it produces a code for that plot that you can write directly into your r script. This is nice because the addin doesn't do everything that is possible wiht ggplot and you most likely will need to tweak the code more. But personally, I always do better with building off a prexisting code. 
 
 ```{r}
-install.packages("esquisser")
+install.packages("esquisser",repos = "http://cran.us.r-project.org")
 library(esquisser)
 ```
 ```{r}
